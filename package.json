@@ -1,0 +1,26 @@
+{
+  "name": "mcp-mautic-server",
+  "version": "1.0.0",
+  "description": "MCP server for Mautic API integration",
+  "type": "module",
+  "bin": {
+    "mcp-mautic-server": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["mcp", "mautic", "api", "server"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
