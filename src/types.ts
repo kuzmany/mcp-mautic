@@ -40,3 +40,35 @@ export interface ListContactsParams {
   orderByDir?: 'asc' | 'desc';
   start?: number;
 }
+
+export interface MauticStatsResponse {
+  total: number;
+  stats: Record<string, any>;
+}
+
+export interface MauticDataResponse {
+  data: any[];
+  dateFormat: string;
+  timeUnit: string;
+  [key: string]: any;
+}
+
+export interface StatsParams {
+  table?: string;
+  start?: number;
+  limit?: number;
+  order?: Array<{col: string; dir: 'ASC' | 'DESC'}>;
+  where?: Array<{col: string; expr: string; val: any}>;
+}
+
+export interface DataParams {
+  type?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  timeUnit?: 'Y' | 'm' | 'W' | 'd' | 'H';
+  filter?: {
+    companyId?: number;
+    campaignId?: number;
+    segmentId?: number;
+  };
+}

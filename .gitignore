@@ -15,6 +15,9 @@ dist/
 .env.test.local
 .env.production.local
 
+# Configuration files with credentials
+claude_desktop_config.json
+
 # Logs
 logs
 *.log

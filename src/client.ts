@@ -4,7 +4,11 @@ import {
   MauticContact, 
   MauticContactsResponse, 
   MauticApiError,
-  ListContactsParams 
+  ListContactsParams,
+  MauticStatsResponse,
+  MauticDataResponse,
+  StatsParams,
+  DataParams
 } from './types.js';
 
 export class MauticClient {
@@ -74,5 +78,56 @@ export class MauticClient {
     return this.makeRequest<{ contact: MauticContact }>(`/contacts/${id}/delete`, {
       method: 'DELETE',
     });
+  }
+
+  // Statistics endpoints
+  async getStats(params: StatsParams = {}): Promise<MauticStatsResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.start) searchParams.set('start', params.start.toString());
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.order) {
+      params.order.forEach((order, index) => {
+        searchParams.set(`order[${index}][col]`, order.col);
+        searchParams.set(`order[${index}][dir]`, order.dir);
+      });
+    }
+    if (params.where) {
+      params.where.forEach((where, index) => {
+        searchParams.set(`where[${index}][col]`, where.col);
+        searchParams.set(`where[${index}][expr]`, where.expr);
+        searchParams.set(`where[${index}][val]`, where.val.toString());
+      });
+    }
+
+    const table = params.table || '';
+    const endpoint = `/stats${table ? '/' + table : ''}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest<MauticStatsResponse>(endpoint);
+  }
+
+  async getData(params: DataParams = {}): Promise<MauticDataResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.dateFrom) searchParams.set('dateFrom', params.dateFrom);
+    if (params.dateTo) searchParams.set('dateTo', params.dateTo);
+    if (params.timeUnit) searchParams.set('timeUnit', params.timeUnit);
+    if (params.filter?.companyId) searchParams.set('filter[companyId]', params.filter.companyId.toString());
+    if (params.filter?.campaignId) searchParams.set('filter[campaignId]', params.filter.campaignId.toString());
+    if (params.filter?.segmentId) searchParams.set('filter[segmentId]', params.filter.segmentId.toString());
+
+    const type = params.type || '';
+    const endpoint = `/data${type ? '/' + type : ''}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest<MauticDataResponse>(endpoint);
+  }
+
+  async getContactActivity(contactId: number, params: { search?: string; includeEvents?: string[]; excludeEvents?: string[]; } = {}): Promise<any> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.search) searchParams.set('search', params.search);
+    if (params.includeEvents) searchParams.set('includeEvents', params.includeEvents.join(','));
+    if (params.excludeEvents) searchParams.set('excludeEvents', params.excludeEvents.join(','));
+
+    const endpoint = `/contacts/${contactId}/activity${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest(endpoint);
   }
 }
