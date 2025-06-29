@@ -303,12 +303,7 @@ export class MauticTools {
           text: `${summary}\n\n${JSON.stringify({
             total: response.total,
             showing: contacts.length,
-            contacts: contacts.map(contact => ({
-              id: contact.id,
-              email: contact.email,
-              name: `${contact.firstname || ''} ${contact.lastname || ''}`.trim(),
-              company: contact.company
-            }))
+            contacts: contacts
           }, null, 2)}`
         }
       ]
