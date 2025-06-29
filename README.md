@@ -128,17 +128,39 @@ npm run dev
 npm run build
 ```
 
-## MCP Client Configuration
+## Installation & Usage
 
-Add to your MCP client configuration:
+This package is available on npm: https://www.npmjs.com/package/mcp-mautic-server
 
-### Global Installation (Recommended)
+### Option 1: NPX (Recommended)
+
+No installation required - use directly with npx:
+
+```json
+{
+  "mcpServers": {
+    "mautic": {
+      "command": "npx",
+      "args": ["mcp-mautic-server"],
+      "env": {
+        "MAUTIC_URL": "https://your-mautic-instance.com",
+        "MAUTIC_CLIENT_ID": "your_client_id",
+        "MAUTIC_CLIENT_SECRET": "your_client_secret"
+      }
+    }
+  }
+}
+```
+
+### Option 2: Global Installation
 
 ```bash
-# Install globally
-sudo npm install -g .
+npm install -g mcp-mautic-server
+```
 
-# Then use in MCP configuration
+Then use in MCP configuration:
+
+```json
 {
   "mcpServers": {
     "mautic": {
@@ -153,7 +175,7 @@ sudo npm install -g .
 }
 ```
 
-### Local Installation
+### Option 3: Local Development
 
 ```json
 {
