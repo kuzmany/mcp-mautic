@@ -72,3 +72,76 @@ export interface DataParams {
     segmentId?: number;
   };
 }
+
+// Asset types
+export interface MauticAsset {
+  id?: number;
+  title: string;
+  description?: string;
+  alias?: string;
+  language?: string;
+  isPublished?: boolean;
+  publishUp?: string;
+  publishDown?: string;
+  downloadCount?: number;
+  uniqueDownloadCount?: number;
+  revision?: number;
+  category?: string;
+  storageLocation?: 'local' | 'remote';
+  path?: string;
+  remotePath?: string;
+  originalFileName?: string;
+  lang?: string;
+  size?: number;
+  disallow?: boolean;
+  [key: string]: any;
+}
+
+export interface MauticAssetsResponse {
+  total: number;
+  assets: Record<string, MauticAsset>;
+}
+
+export interface ListAssetsParams {
+  limit?: number;
+  search?: string;
+  orderBy?: 'id' | 'title' | 'alias' | 'downloadCount';
+  orderByDir?: 'asc' | 'desc';
+  start?: number;
+  publishedOnly?: boolean;
+}
+
+// Segment types
+export interface MauticSegment {
+  id?: number;
+  name: string;
+  alias?: string;
+  description?: string;
+  isPublished?: boolean;
+  publishUp?: string;
+  publishDown?: string;
+  filters?: Array<{
+    glue?: string;
+    field?: string;
+    object?: string;
+    type?: string;
+    operator?: string;
+    properties?: Record<string, any>;
+    filter?: any;
+  }>;
+  [key: string]: any;
+}
+
+export interface MauticSegmentsResponse {
+  total: number;
+  lists: Record<string, MauticSegment>;
+}
+
+export interface ListSegmentsParams {
+  limit?: number;
+  search?: string;
+  orderBy?: 'id' | 'name' | 'alias';
+  orderByDir?: 'asc' | 'desc';
+  start?: number;
+  publishedOnly?: boolean;
+}

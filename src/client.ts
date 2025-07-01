@@ -8,7 +8,13 @@ import {
   MauticStatsResponse,
   MauticDataResponse,
   StatsParams,
-  DataParams
+  DataParams,
+  MauticAsset,
+  MauticAssetsResponse,
+  ListAssetsParams,
+  MauticSegment,
+  MauticSegmentsResponse,
+  ListSegmentsParams
 } from './types.js';
 
 export class MauticClient {
@@ -129,5 +135,95 @@ export class MauticClient {
 
     const endpoint = `/contacts/${contactId}/activity${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     return this.makeRequest(endpoint);
+  }
+
+  // Asset methods
+  async listAssets(params: ListAssetsParams = {}): Promise<MauticAssetsResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.search) searchParams.set('search', params.search);
+    if (params.orderBy) searchParams.set('orderBy', params.orderBy);
+    if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
+    if (params.start) searchParams.set('start', params.start.toString());
+    if (params.publishedOnly) searchParams.set('publishedOnly', 'true');
+
+    const endpoint = `/assets${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest<MauticAssetsResponse>(endpoint);
+  }
+
+  async getAsset(id: number): Promise<{ asset: MauticAsset }> {
+    return this.makeRequest<{ asset: MauticAsset }>(`/assets/${id}`);
+  }
+
+  async createAsset(asset: Omit<MauticAsset, 'id'>): Promise<{ asset: MauticAsset }> {
+    return this.makeRequest<{ asset: MauticAsset }>('/assets/new', {
+      method: 'POST',
+      body: JSON.stringify(asset),
+    });
+  }
+
+  async updateAsset(id: number, asset: Partial<MauticAsset>): Promise<{ asset: MauticAsset }> {
+    return this.makeRequest<{ asset: MauticAsset }>(`/assets/${id}/edit`, {
+      method: 'PATCH',
+      body: JSON.stringify(asset),
+    });
+  }
+
+  async deleteAsset(id: number): Promise<{ asset: MauticAsset }> {
+    return this.makeRequest<{ asset: MauticAsset }>(`/assets/${id}/delete`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Segment methods
+  async listSegments(params: ListSegmentsParams = {}): Promise<MauticSegmentsResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.search) searchParams.set('search', params.search);
+    if (params.orderBy) searchParams.set('orderBy', params.orderBy);
+    if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
+    if (params.start) searchParams.set('start', params.start.toString());
+    if (params.publishedOnly) searchParams.set('publishedOnly', 'true');
+
+    const endpoint = `/segments${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest<MauticSegmentsResponse>(endpoint);
+  }
+
+  async getSegment(id: number): Promise<{ list: MauticSegment }> {
+    return this.makeRequest<{ list: MauticSegment }>(`/segments/${id}`);
+  }
+
+  async createSegment(segment: Omit<MauticSegment, 'id'>): Promise<{ list: MauticSegment }> {
+    return this.makeRequest<{ list: MauticSegment }>('/segments/new', {
+      method: 'POST',
+      body: JSON.stringify(segment),
+    });
+  }
+
+  async updateSegment(id: number, segment: Partial<MauticSegment>): Promise<{ list: MauticSegment }> {
+    return this.makeRequest<{ list: MauticSegment }>(`/segments/${id}/edit`, {
+      method: 'PATCH',
+      body: JSON.stringify(segment),
+    });
+  }
+
+  async deleteSegment(id: number): Promise<{ list: MauticSegment }> {
+    return this.makeRequest<{ list: MauticSegment }>(`/segments/${id}/delete`, {
+      method: 'DELETE',
+    });
+  }
+
+  async addContactToSegment(segmentId: number, contactId: number): Promise<{ success: boolean }> {
+    return this.makeRequest<{ success: boolean }>(`/segments/${segmentId}/contact/${contactId}/add`, {
+      method: 'POST',
+    });
+  }
+
+  async removeContactFromSegment(segmentId: number, contactId: number): Promise<{ success: boolean }> {
+    return this.makeRequest<{ success: boolean }>(`/segments/${segmentId}/contact/${contactId}/remove`, {
+      method: 'POST',
+    });
   }
 }

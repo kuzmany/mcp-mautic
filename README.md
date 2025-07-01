@@ -6,6 +6,8 @@ A Model Context Protocol (MCP) server for integrating with Mautic marketing auto
 
 - **OAuth2 Client Credentials Authentication** - Secure server-to-server authentication
 - **Contact Management** - Complete CRUD operations for contacts in Mautic
+- **Asset Management** - Manage marketing assets (files, documents, images)
+- **Segment Management** - Create and manage contact segments with advanced filtering
 - **Statistics & Analytics** - Access to email stats, campaign data, and contact activity
 - **Dashboard Data** - Real-time analytics and performance metrics
 - **Type-Safe API** - Full TypeScript support with input validation
@@ -79,6 +81,122 @@ Get activity timeline for a specific contact.
 - `contactId` (number, required): Contact ID to get activity for
 - `search` (string): Search term to filter activities
 - `includeEvents` (array): Specific event types to include (`email.read`, `form.submitted`, `page.hit`, etc.)
+
+### Asset Management
+
+#### `mautic_list_assets`
+List assets from Mautic with filtering and pagination options.
+
+**Parameters:**
+- `limit` (number, 1-100): Number of assets to retrieve (default: 10)
+- `search` (string): Search term for filtering assets
+- `orderBy` (string): Field to sort by (`id`, `title`, `alias`, `downloadCount`)
+- `orderByDir` (string): Sort direction (`asc`, `desc`)
+- `start` (number): Starting position for pagination
+- `publishedOnly` (boolean): Return only published assets
+
+#### `mautic_get_asset`
+Get a specific asset by ID.
+
+**Parameters:**
+- `id` (number, required): Asset ID to retrieve
+
+#### `mautic_create_asset`
+Create a new asset in Mautic.
+
+**Parameters:**
+- `title` (string, required): Asset title
+- `description` (string): Asset description
+- `alias` (string): Asset alias
+- `language` (string): Asset language
+- `isPublished` (boolean): Whether the asset is published
+- `storageLocation` (string): Storage location (`local`, `remote`)
+- `remotePath` (string): Remote path (URL) for remote assets
+- `category` (string): Asset category
+
+#### `mautic_update_asset`
+Update an existing asset in Mautic.
+
+**Parameters:**
+- `id` (number, required): Asset ID to update
+- `title` (string): Asset title
+- `description` (string): Asset description
+- `alias` (string): Asset alias
+- `language` (string): Asset language
+- `isPublished` (boolean): Whether the asset is published
+- `category` (string): Asset category
+
+#### `mautic_delete_asset`
+⚠️ **DANGER**: Permanently delete an asset from Mautic.
+
+**Parameters:**
+- `id` (number, required): Asset ID to delete
+- `confirm` (boolean, required): Must be `true` to confirm deletion
+
+### Segment Management
+
+#### `mautic_list_segments`
+List segments from Mautic with filtering and pagination options.
+
+**Parameters:**
+- `limit` (number, 1-100): Number of segments to retrieve (default: 10)
+- `search` (string): Search term for filtering segments
+- `orderBy` (string): Field to sort by (`id`, `name`, `alias`)
+- `orderByDir` (string): Sort direction (`asc`, `desc`)
+- `start` (number): Starting position for pagination
+- `publishedOnly` (boolean): Return only published segments
+
+#### `mautic_get_segment`
+Get a specific segment by ID.
+
+**Parameters:**
+- `id` (number, required): Segment ID to retrieve
+
+#### `mautic_create_segment`
+Create a new segment in Mautic.
+
+**Parameters:**
+- `name` (string, required): Segment name
+- `alias` (string): Segment alias
+- `description` (string): Segment description
+- `isPublished` (boolean): Whether the segment is published
+- `filters` (array): Array of filter objects for segment criteria
+  - `glue` (string): Logical operator (`and`, `or`)
+  - `field` (string): Field to filter on
+  - `operator` (string): Comparison operator (`=`, `!=`, `like`, `contains`, etc.)
+  - `filter`: Filter value
+
+#### `mautic_update_segment`
+Update an existing segment in Mautic.
+
+**Parameters:**
+- `id` (number, required): Segment ID to update
+- `name` (string): Segment name
+- `alias` (string): Segment alias
+- `description` (string): Segment description
+- `isPublished` (boolean): Whether the segment is published
+- `filters` (array): Array of filter objects for segment criteria
+
+#### `mautic_delete_segment`
+⚠️ **DANGER**: Permanently delete a segment from Mautic.
+
+**Parameters:**
+- `id` (number, required): Segment ID to delete
+- `confirm` (boolean, required): Must be `true` to confirm deletion
+
+#### `mautic_add_contact_to_segment`
+Add a contact to a specific segment.
+
+**Parameters:**
+- `segmentId` (number, required): Segment ID
+- `contactId` (number, required): Contact ID to add to segment
+
+#### `mautic_remove_contact_from_segment`
+Remove a contact from a specific segment.
+
+**Parameters:**
+- `segmentId` (number, required): Segment ID
+- `contactId` (number, required): Contact ID to remove from segment
 
 ## Setup
 

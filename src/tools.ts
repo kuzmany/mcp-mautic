@@ -244,6 +244,384 @@ export class MauticTools {
           },
           required: ["contactId"]
         }
+      },
+      // Asset management tools
+      {
+        name: "mautic_list_assets",
+        description: "List assets from Mautic with filtering and pagination options",
+        inputSchema: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of assets to retrieve (1-100)",
+              minimum: 1,
+              maximum: 100,
+              default: 10
+            },
+            search: {
+              type: "string",
+              description: "Search term for filtering assets by title, description, etc."
+            },
+            orderBy: {
+              type: "string",
+              enum: ["id", "title", "alias", "downloadCount"],
+              description: "Field to sort by"
+            },
+            orderByDir: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort direction",
+              default: "asc"
+            },
+            start: {
+              type: "number",
+              description: "Starting position for pagination",
+              minimum: 0,
+              default: 0
+            },
+            publishedOnly: {
+              type: "boolean",
+              description: "Return only published assets",
+              default: false
+            }
+          }
+        }
+      },
+      {
+        name: "mautic_get_asset",
+        description: "Get a specific asset by ID",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Asset ID to retrieve (required)"
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_create_asset",
+        description: "Create a new asset in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+              description: "Asset title (required)"
+            },
+            description: {
+              type: "string",
+              description: "Asset description"
+            },
+            alias: {
+              type: "string",
+              description: "Asset alias"
+            },
+            language: {
+              type: "string",
+              description: "Asset language"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the asset is published",
+              default: true
+            },
+            storageLocation: {
+              type: "string",
+              enum: ["local", "remote"],
+              description: "Storage location for the asset",
+              default: "local"
+            },
+            remotePath: {
+              type: "string",
+              description: "Remote path (URL) for remote assets"
+            },
+            category: {
+              type: "string",
+              description: "Asset category"
+            }
+          },
+          required: ["title"]
+        }
+      },
+      {
+        name: "mautic_update_asset",
+        description: "Update an existing asset in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Asset ID to update (required)"
+            },
+            title: {
+              type: "string",
+              description: "Asset title"
+            },
+            description: {
+              type: "string",
+              description: "Asset description"
+            },
+            alias: {
+              type: "string",
+              description: "Asset alias"
+            },
+            language: {
+              type: "string",
+              description: "Asset language"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the asset is published"
+            },
+            category: {
+              type: "string",
+              description: "Asset category"
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_delete_asset",
+        description: "⚠️ DANGER: Permanently delete an asset from Mautic (requires confirmation)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Asset ID to delete (required)"
+            },
+            confirm: {
+              type: "boolean",
+              description: "Must be set to true to confirm deletion (required for safety)"
+            }
+          },
+          required: ["id", "confirm"]
+        }
+      },
+      // Segment management tools
+      {
+        name: "mautic_list_segments",
+        description: "List segments from Mautic with filtering and pagination options",
+        inputSchema: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of segments to retrieve (1-100)",
+              minimum: 1,
+              maximum: 100,
+              default: 10
+            },
+            search: {
+              type: "string",
+              description: "Search term for filtering segments by name, description, etc."
+            },
+            orderBy: {
+              type: "string",
+              enum: ["id", "name", "alias"],
+              description: "Field to sort by"
+            },
+            orderByDir: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort direction",
+              default: "asc"
+            },
+            start: {
+              type: "number",
+              description: "Starting position for pagination",
+              minimum: 0,
+              default: 0
+            },
+            publishedOnly: {
+              type: "boolean",
+              description: "Return only published segments",
+              default: false
+            }
+          }
+        }
+      },
+      {
+        name: "mautic_get_segment",
+        description: "Get a specific segment by ID",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Segment ID to retrieve (required)"
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_create_segment",
+        description: "Create a new segment in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "Segment name (required)"
+            },
+            alias: {
+              type: "string",
+              description: "Segment alias"
+            },
+            description: {
+              type: "string",
+              description: "Segment description"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the segment is published",
+              default: true
+            },
+            filters: {
+              type: "array",
+              description: "Array of filter objects for segment criteria",
+              items: {
+                type: "object",
+                properties: {
+                  glue: {
+                    type: "string",
+                    enum: ["and", "or"],
+                    description: "Logical operator to connect filters"
+                  },
+                  field: {
+                    type: "string",
+                    description: "Field to filter on"
+                  },
+                  operator: {
+                    type: "string",
+                    enum: ["=", "!=", "empty", "!empty", "like", "!like", "regexp", "!regexp", "startsWith", "endsWith", "contains"],
+                    description: "Comparison operator"
+                  },
+                  filter: {
+                    description: "Filter value"
+                  }
+                }
+              }
+            }
+          },
+          required: ["name"]
+        }
+      },
+      {
+        name: "mautic_update_segment",
+        description: "Update an existing segment in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Segment ID to update (required)"
+            },
+            name: {
+              type: "string",
+              description: "Segment name"
+            },
+            alias: {
+              type: "string",
+              description: "Segment alias"
+            },
+            description: {
+              type: "string",
+              description: "Segment description"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the segment is published"
+            },
+            filters: {
+              type: "array",
+              description: "Array of filter objects for segment criteria",
+              items: {
+                type: "object",
+                properties: {
+                  glue: {
+                    type: "string",
+                    enum: ["and", "or"],
+                    description: "Logical operator to connect filters"
+                  },
+                  field: {
+                    type: "string",
+                    description: "Field to filter on"
+                  },
+                  operator: {
+                    type: "string",
+                    enum: ["=", "!=", "empty", "!empty", "like", "!like", "regexp", "!regexp", "startsWith", "endsWith", "contains"],
+                    description: "Comparison operator"
+                  },
+                  filter: {
+                    description: "Filter value"
+                  }
+                }
+              }
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_delete_segment",
+        description: "⚠️ DANGER: Permanently delete a segment from Mautic (requires confirmation)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Segment ID to delete (required)"
+            },
+            confirm: {
+              type: "boolean",
+              description: "Must be set to true to confirm deletion (required for safety)"
+            }
+          },
+          required: ["id", "confirm"]
+        }
+      },
+      {
+        name: "mautic_add_contact_to_segment",
+        description: "Add a contact to a specific segment",
+        inputSchema: {
+          type: "object",
+          properties: {
+            segmentId: {
+              type: "number",
+              description: "Segment ID (required)"
+            },
+            contactId: {
+              type: "number",
+              description: "Contact ID to add to segment (required)"
+            }
+          },
+          required: ["segmentId", "contactId"]
+        }
+      },
+      {
+        name: "mautic_remove_contact_from_segment",
+        description: "Remove a contact from a specific segment",
+        inputSchema: {
+          type: "object",
+          properties: {
+            segmentId: {
+              type: "number",
+              description: "Segment ID (required)"
+            },
+            contactId: {
+              type: "number",
+              description: "Contact ID to remove from segment (required)"
+            }
+          },
+          required: ["segmentId", "contactId"]
+        }
       }
     ];
   }
@@ -265,6 +643,32 @@ export class MauticTools {
           return await this.getDashboardData(args);
         case "mautic_get_contact_activity":
           return await this.getContactActivity(args);
+        // Asset tools
+        case "mautic_list_assets":
+          return await this.listAssets(args);
+        case "mautic_get_asset":
+          return await this.getAsset(args);
+        case "mautic_create_asset":
+          return await this.createAsset(args);
+        case "mautic_update_asset":
+          return await this.updateAsset(args);
+        case "mautic_delete_asset":
+          return await this.deleteAsset(args);
+        // Segment tools
+        case "mautic_list_segments":
+          return await this.listSegments(args);
+        case "mautic_get_segment":
+          return await this.getSegment(args);
+        case "mautic_create_segment":
+          return await this.createSegment(args);
+        case "mautic_update_segment":
+          return await this.updateSegment(args);
+        case "mautic_delete_segment":
+          return await this.deleteSegment(args);
+        case "mautic_add_contact_to_segment":
+          return await this.addContactToSegment(args);
+        case "mautic_remove_contact_from_segment":
+          return await this.removeContactFromSegment(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -484,6 +888,373 @@ export class MauticTools {
               includeEvents: validatedArgs.includeEvents
             },
             activities: response
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  // Asset methods
+  private async listAssets(args: any = {}) {
+    const schema = z.object({
+      limit: z.number().min(1).max(100).optional().default(10),
+      search: z.string().optional(),
+      orderBy: z.enum(['id', 'title', 'alias', 'downloadCount']).optional(),
+      orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
+      start: z.number().min(0).optional().default(0),
+      publishedOnly: z.boolean().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.listAssets(validatedArgs);
+    
+    const assets = Object.values(response.assets);
+    const summary = `Found ${response.total} total assets, showing ${assets.length} assets`;
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${summary}\n\n${JSON.stringify({
+            total: response.total,
+            showing: assets.length,
+            assets: assets
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async getAsset(args: any) {
+    const schema = z.object({
+      id: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.getAsset(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Asset details:\n\n${JSON.stringify({
+            id: response.asset.id,
+            title: response.asset.title,
+            description: response.asset.description,
+            downloadCount: response.asset.downloadCount,
+            storageLocation: response.asset.storageLocation,
+            isPublished: response.asset.isPublished
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async createAsset(args: any) {
+    const schema = z.object({
+      title: z.string(),
+      description: z.string().optional(),
+      alias: z.string().optional(),
+      language: z.string().optional(),
+      isPublished: z.boolean().optional(),
+      storageLocation: z.enum(['local', 'remote']).optional(),
+      remotePath: z.string().optional(),
+      category: z.string().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.createAsset(validatedArgs);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Asset created successfully:\n\n${JSON.stringify({
+            id: response.asset.id,
+            title: response.asset.title,
+            description: response.asset.description,
+            storageLocation: response.asset.storageLocation,
+            isPublished: response.asset.isPublished,
+            createdAt: response.asset.dateAdded
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async updateAsset(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      alias: z.string().optional(),
+      language: z.string().optional(),
+      isPublished: z.boolean().optional(),
+      category: z.string().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const { id, ...updateData } = validatedArgs;
+    
+    const cleanUpdateData = Object.fromEntries(
+      Object.entries(updateData).filter(([_, value]) => value !== undefined)
+    );
+
+    if (Object.keys(cleanUpdateData).length === 0) {
+      throw new Error('At least one field must be provided for update');
+    }
+
+    const response = await this.client.updateAsset(id, cleanUpdateData);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Asset updated successfully:\n\n${JSON.stringify({
+            id: response.asset.id,
+            title: response.asset.title,
+            description: response.asset.description,
+            isPublished: response.asset.isPublished,
+            updatedAt: response.asset.dateModified
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async deleteAsset(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      confirm: z.boolean()
+    });
+
+    const validatedArgs = schema.parse(args);
+    
+    if (!validatedArgs.confirm) {
+      throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
+    }
+
+    const response = await this.client.deleteAsset(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Asset deleted successfully:\n\n${JSON.stringify({
+            id: response.asset.id,
+            title: response.asset.title,
+            deletedAt: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  // Segment methods
+  private async listSegments(args: any = {}) {
+    const schema = z.object({
+      limit: z.number().min(1).max(100).optional().default(10),
+      search: z.string().optional(),
+      orderBy: z.enum(['id', 'name', 'alias']).optional(),
+      orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
+      start: z.number().min(0).optional().default(0),
+      publishedOnly: z.boolean().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.listSegments(validatedArgs);
+    
+    const segments = Object.values(response.lists);
+    const summary = `Found ${response.total} total segments, showing ${segments.length} segments`;
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${summary}\n\n${JSON.stringify({
+            total: response.total,
+            showing: segments.length,
+            segments: segments
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async getSegment(args: any) {
+    const schema = z.object({
+      id: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.getSegment(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Segment details:\n\n${JSON.stringify({
+            id: response.list.id,
+            name: response.list.name,
+            alias: response.list.alias,
+            description: response.list.description,
+            isPublished: response.list.isPublished,
+            filters: response.list.filters
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async createSegment(args: any) {
+    const schema = z.object({
+      name: z.string(),
+      alias: z.string().optional(),
+      description: z.string().optional(),
+      isPublished: z.boolean().optional(),
+      filters: z.array(z.object({
+        glue: z.enum(['and', 'or']).optional(),
+        field: z.string().optional(),
+        operator: z.string().optional(),
+        filter: z.any().optional()
+      })).optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.createSegment(validatedArgs);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Segment created successfully:\n\n${JSON.stringify({
+            id: response.list.id,
+            name: response.list.name,
+            alias: response.list.alias,
+            description: response.list.description,
+            isPublished: response.list.isPublished,
+            createdAt: response.list.dateAdded
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async updateSegment(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      name: z.string().optional(),
+      alias: z.string().optional(),
+      description: z.string().optional(),
+      isPublished: z.boolean().optional(),
+      filters: z.array(z.object({
+        glue: z.enum(['and', 'or']).optional(),
+        field: z.string().optional(),
+        operator: z.string().optional(),
+        filter: z.any().optional()
+      })).optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const { id, ...updateData } = validatedArgs;
+    
+    const cleanUpdateData = Object.fromEntries(
+      Object.entries(updateData).filter(([_, value]) => value !== undefined)
+    );
+
+    if (Object.keys(cleanUpdateData).length === 0) {
+      throw new Error('At least one field must be provided for update');
+    }
+
+    const response = await this.client.updateSegment(id, cleanUpdateData);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Segment updated successfully:\n\n${JSON.stringify({
+            id: response.list.id,
+            name: response.list.name,
+            alias: response.list.alias,
+            description: response.list.description,
+            isPublished: response.list.isPublished,
+            updatedAt: response.list.dateModified
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async deleteSegment(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      confirm: z.boolean()
+    });
+
+    const validatedArgs = schema.parse(args);
+    
+    if (!validatedArgs.confirm) {
+      throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
+    }
+
+    const response = await this.client.deleteSegment(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Segment deleted successfully:\n\n${JSON.stringify({
+            id: response.list.id,
+            name: response.list.name,
+            deletedAt: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async addContactToSegment(args: any) {
+    const schema = z.object({
+      segmentId: z.number(),
+      contactId: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.addContactToSegment(validatedArgs.segmentId, validatedArgs.contactId);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Contact successfully added to segment:\n\n${JSON.stringify({
+            segmentId: validatedArgs.segmentId,
+            contactId: validatedArgs.contactId,
+            success: response.success,
+            timestamp: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async removeContactFromSegment(args: any) {
+    const schema = z.object({
+      segmentId: z.number(),
+      contactId: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.removeContactFromSegment(validatedArgs.segmentId, validatedArgs.contactId);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Contact successfully removed from segment:\n\n${JSON.stringify({
+            segmentId: validatedArgs.segmentId,
+            contactId: validatedArgs.contactId,
+            success: response.success,
+            timestamp: new Date().toISOString()
           }, null, 2)}`
         }
       ]
