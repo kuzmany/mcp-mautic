@@ -39,6 +39,8 @@ export interface ListContactsParams {
   orderBy?: 'id' | 'email' | 'date_added';
   orderByDir?: 'asc' | 'desc';
   start?: number;
+  minimal?: boolean;
+  fullResponse?: boolean;
 }
 
 export interface MauticStatsResponse {
@@ -109,6 +111,7 @@ export interface ListAssetsParams {
   orderByDir?: 'asc' | 'desc';
   start?: number;
   publishedOnly?: boolean;
+  minimal?: boolean;
 }
 
 // Segment types
@@ -144,4 +147,5 @@ export interface ListSegmentsParams {
   orderByDir?: 'asc' | 'desc';
   start?: number;
   publishedOnly?: boolean;
+  minimal?: boolean;
 }

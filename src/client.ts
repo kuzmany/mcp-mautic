@@ -57,6 +57,7 @@ export class MauticClient {
     if (params.orderBy) searchParams.set('orderBy', params.orderBy);
     if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
     if (params.start) searchParams.set('start', params.start.toString());
+    if (params.minimal !== undefined) searchParams.set('minimal', params.minimal.toString());
 
     const endpoint = `/contacts${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     return this.makeRequest<MauticContactsResponse>(endpoint);
@@ -147,6 +148,7 @@ export class MauticClient {
     if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
     if (params.start) searchParams.set('start', params.start.toString());
     if (params.publishedOnly) searchParams.set('publishedOnly', 'true');
+    if (params.minimal !== undefined) searchParams.set('minimal', params.minimal.toString());
 
     const endpoint = `/assets${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     return this.makeRequest<MauticAssetsResponse>(endpoint);
@@ -186,6 +188,7 @@ export class MauticClient {
     if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
     if (params.start) searchParams.set('start', params.start.toString());
     if (params.publishedOnly) searchParams.set('publishedOnly', 'true');
+    if (params.minimal !== undefined) searchParams.set('minimal', params.minimal.toString());
 
     const endpoint = `/segments${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
     return this.makeRequest<MauticSegmentsResponse>(endpoint);

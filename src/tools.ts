@@ -8,6 +8,20 @@ export class MauticTools {
     this.client = client;
   }
 
+  private filterContactResponse(contact: any, fullResponse: boolean = false): any {
+    if (fullResponse || !contact.fields) {
+      return contact;
+    }
+
+    // Create a simplified contact object with only fields.all
+    const filtered = { ...contact };
+    if (contact.fields && contact.fields.all) {
+      filtered.fields = { all: contact.fields.all };
+    }
+    
+    return filtered;
+  }
+
   getToolDefinitions() {
     return [
       {
@@ -43,8 +57,37 @@ export class MauticTools {
               description: "Starting position for pagination",
               minimum: 0,
               default: 0
+            },
+            minimal: {
+              type: "boolean",
+              description: "Return minimal contact data (default: true for reduced output)",
+              default: true
+            },
+            fullResponse: {
+              type: "boolean",
+              description: "Return complete field definitions (default: false, only returns fields.all)",
+              default: false
             }
           }
+        }
+      },
+      {
+        name: "mautic_get_contact",
+        description: "Get a specific contact by ID",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Contact ID to retrieve (required)"
+            },
+            fullResponse: {
+              type: "boolean",
+              description: "Return complete field definitions (default: false, only returns fields.all)",
+              default: false
+            }
+          },
+          required: ["id"]
         }
       },
       {
@@ -73,6 +116,11 @@ export class MauticTools {
             phone: {
               type: "string",
               description: "Contact phone number"
+            },
+            fullResponse: {
+              type: "boolean",
+              description: "Return complete field definitions (default: false, only returns fields.all)",
+              default: false
             }
           },
           required: ["email"]
@@ -108,6 +156,11 @@ export class MauticTools {
             phone: {
               type: "string",
               description: "Contact phone number"
+            },
+            fullResponse: {
+              type: "boolean",
+              description: "Return complete field definitions (default: false, only returns fields.all)",
+              default: false
             }
           },
           required: ["id"]
@@ -126,6 +179,11 @@ export class MauticTools {
             confirm: {
               type: "boolean",
               description: "Must be set to true to confirm deletion (required for safety)"
+            },
+            fullResponse: {
+              type: "boolean",
+              description: "Return complete field definitions (default: false, only returns fields.all)",
+              default: false
             }
           },
           required: ["id", "confirm"]
@@ -284,6 +342,11 @@ export class MauticTools {
               type: "boolean",
               description: "Return only published assets",
               default: false
+            },
+            minimal: {
+              type: "boolean",
+              description: "Return minimal asset data (default: true for reduced output)",
+              default: true
             }
           }
         }
@@ -442,6 +505,11 @@ export class MauticTools {
               type: "boolean",
               description: "Return only published segments",
               default: false
+            },
+            minimal: {
+              type: "boolean",
+              description: "Return minimal segment data (default: true for reduced output)",
+              default: true
             }
           }
         }
@@ -631,6 +699,8 @@ export class MauticTools {
       switch (name) {
         case "mautic_list_contacts":
           return await this.listContacts(args);
+        case "mautic_get_contact":
+          return await this.getContact(args);
         case "mautic_create_contact":
           return await this.createContact(args);
         case "mautic_update_contact":
@@ -685,19 +755,44 @@ export class MauticTools {
     }
   }
 
+  private async getContact(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      fullResponse: z.boolean().optional().default(false)
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.getContact(validatedArgs.id);
+    
+    const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Contact retrieved successfully:\n\n${JSON.stringify(filteredContact, null, 2)}`
+        }
+      ]
+    };
+  }
+
   private async listContacts(args: any = {}) {
     const schema = z.object({
       limit: z.number().min(1).max(100).optional().default(10),
       search: z.string().optional(),
       orderBy: z.enum(['id', 'email', 'date_added']).optional(),
       orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
-      start: z.number().min(0).optional().default(0)
+      start: z.number().min(0).optional().default(0),
+      minimal: z.boolean().optional().default(true),
+      fullResponse: z.boolean().optional().default(false)
     });
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.listContacts(validatedArgs);
     
-    const contacts = Object.values(response.contacts);
+    const contacts = Object.values(response.contacts).map(contact => 
+      this.filterContactResponse(contact, validatedArgs.fullResponse)
+    );
     const summary = `Found ${response.total} total contacts, showing ${contacts.length} contacts`;
     
     return {
@@ -720,23 +815,20 @@ export class MauticTools {
       firstname: z.string().optional(),
       lastname: z.string().optional(),
       company: z.string().optional(),
-      phone: z.string().optional()
+      phone: z.string().optional(),
+      fullResponse: z.boolean().optional().default(false)
     });
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.createContact(validatedArgs);
     
+    const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
+    
     return {
       content: [
         {
           type: "text",
-          text: `Contact created successfully:\n\n${JSON.stringify({
-            id: response.contact.id,
-            email: response.contact.email,
-            name: `${response.contact.firstname || ''} ${response.contact.lastname || ''}`.trim(),
-            company: response.contact.company,
-            createdAt: response.contact.dateAdded
-          }, null, 2)}`
+          text: `Contact created successfully:\n\n${JSON.stringify(filteredContact, null, 2)}`
         }
       ]
     };
@@ -749,11 +841,12 @@ export class MauticTools {
       firstname: z.string().optional(),
       lastname: z.string().optional(),
       company: z.string().optional(),
-      phone: z.string().optional()
+      phone: z.string().optional(),
+      fullResponse: z.boolean().optional().default(false)
     });
 
     const validatedArgs = schema.parse(args);
-    const { id, ...updateData } = validatedArgs;
+    const { id, fullResponse, ...updateData } = validatedArgs;
     
     // Remove undefined values
     const cleanUpdateData = Object.fromEntries(
@@ -766,17 +859,13 @@ export class MauticTools {
 
     const response = await this.client.updateContact(id, cleanUpdateData);
     
+    const filteredContact = this.filterContactResponse(response.contact, fullResponse);
+    
     return {
       content: [
         {
           type: "text",
-          text: `Contact updated successfully:\n\n${JSON.stringify({
-            id: response.contact.id,
-            email: response.contact.email,
-            name: `${response.contact.firstname || ''} ${response.contact.lastname || ''}`.trim(),
-            company: response.contact.company,
-            updatedAt: response.contact.dateModified
-          }, null, 2)}`
+          text: `Contact updated successfully:\n\n${JSON.stringify(filteredContact, null, 2)}`
         }
       ]
     };
@@ -785,7 +874,8 @@ export class MauticTools {
   private async deleteContact(args: any) {
     const schema = z.object({
       id: z.number(),
-      confirm: z.boolean()
+      confirm: z.boolean(),
+      fullResponse: z.boolean().optional().default(false)
     });
 
     const validatedArgs = schema.parse(args);
@@ -796,16 +886,13 @@ export class MauticTools {
 
     const response = await this.client.deleteContact(validatedArgs.id);
     
+    const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
+    
     return {
       content: [
         {
           type: "text",
-          text: `Contact deleted successfully:\n\n${JSON.stringify({
-            id: response.contact.id,
-            email: response.contact.email,
-            name: `${response.contact.firstname || ''} ${response.contact.lastname || ''}`.trim(),
-            deletedAt: new Date().toISOString()
-          }, null, 2)}`
+          text: `Contact deleted successfully:\n\n${JSON.stringify(filteredContact, null, 2)}`
         }
       ]
     };
@@ -902,7 +989,8 @@ export class MauticTools {
       orderBy: z.enum(['id', 'title', 'alias', 'downloadCount']).optional(),
       orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
       start: z.number().min(0).optional().default(0),
-      publishedOnly: z.boolean().optional()
+      publishedOnly: z.boolean().optional(),
+      minimal: z.boolean().optional().default(true)
     });
 
     const validatedArgs = schema.parse(args);
@@ -1058,7 +1146,8 @@ export class MauticTools {
       orderBy: z.enum(['id', 'name', 'alias']).optional(),
       orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
       start: z.number().min(0).optional().default(0),
-      publishedOnly: z.boolean().optional()
+      publishedOnly: z.boolean().optional(),
+      minimal: z.boolean().optional().default(true)
     });
 
     const validatedArgs = schema.parse(args);
