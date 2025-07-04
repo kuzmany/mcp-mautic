@@ -11,7 +11,7 @@ A Model Context Protocol (MCP) server for Mautic marketing automation platform. 
   "mcpServers": {
     "mautic": {
       "command": "npx",
-      "args": ["mcp-mautic-server"],
+      "args": ["--yes", "mcp-mautic-server"],
       "env": {
         "MAUTIC_URL": "https://your-mautic-instance.com",
         "MAUTIC_CLIENT_ID": "your_client_id",
