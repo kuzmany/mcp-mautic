@@ -765,7 +765,7 @@ export class MauticTools {
             },
             subject: {
               type: "string",
-              description: "Email subject line"
+              description: "Email subject line (required for most email types)"
             },
             fromAddress: {
               type: "string",
@@ -805,7 +805,7 @@ export class MauticTools {
               description: "Email language"
             }
           },
-          required: ["name"]
+          required: ["name", "subject"]
         }
       },
       {
@@ -1649,7 +1649,7 @@ export class MauticTools {
   private async createEmail(args: any) {
     const schema = z.object({
       name: z.string(),
-      subject: z.string().optional(),
+      subject: z.string(),
       fromAddress: z.string().email().optional(),
       fromName: z.string().optional(),
       replyToAddress: z.string().email().optional(),
