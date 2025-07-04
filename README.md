@@ -45,6 +45,15 @@ A Model Context Protocol (MCP) server for Mautic marketing automation platform. 
 - `mautic_update_contact` - Update existing contact
 - `mautic_delete_contact` - Delete contact (requires confirmation)
 
+### Emails
+- `mautic_list_emails` - List marketing emails
+- `mautic_get_email` - Get specific email by ID
+- `mautic_create_email` - Create new email (template or segment)
+- `mautic_update_email` - Update email content and settings
+- `mautic_delete_email` - Delete email (requires confirmation)
+- `mautic_send_email_to_contact` - Send email to specific contact with token personalization
+- `mautic_send_email_to_segments` - Send email to all contacts in assigned segments
+
 ### Assets
 - `mautic_list_assets` - List marketing assets
 - `mautic_get_asset` - Get specific asset

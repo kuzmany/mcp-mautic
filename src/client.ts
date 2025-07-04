@@ -14,7 +14,12 @@ import {
   ListAssetsParams,
   MauticSegment,
   MauticSegmentsResponse,
-  ListSegmentsParams
+  ListSegmentsParams,
+  MauticEmail,
+  MauticEmailsResponse,
+  ListEmailsParams,
+  SendEmailParams,
+  SendEmailResponse
 } from './types.js';
 
 export class MauticClient {
@@ -226,6 +231,64 @@ export class MauticClient {
 
   async removeContactFromSegment(segmentId: number, contactId: number): Promise<{ success: boolean }> {
     return this.makeRequest<{ success: boolean }>(`/segments/${segmentId}/contact/${contactId}/remove`, {
+      method: 'POST',
+    });
+  }
+
+  // Email methods
+  async listEmails(params: ListEmailsParams = {}): Promise<MauticEmailsResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.search) searchParams.set('search', params.search);
+    if (params.orderBy) searchParams.set('orderBy', params.orderBy);
+    if (params.orderByDir) searchParams.set('orderByDir', params.orderByDir);
+    if (params.start) searchParams.set('start', params.start.toString());
+    if (params.publishedOnly) searchParams.set('publishedOnly', 'true');
+    if (params.minimal !== undefined) searchParams.set('minimal', params.minimal.toString());
+
+    const endpoint = `/emails${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return this.makeRequest<MauticEmailsResponse>(endpoint);
+  }
+
+  async getEmail(id: number): Promise<{ email: MauticEmail }> {
+    return this.makeRequest<{ email: MauticEmail }>(`/emails/${id}`);
+  }
+
+  async createEmail(email: Omit<MauticEmail, 'id'>): Promise<{ email: MauticEmail }> {
+    return this.makeRequest<{ email: MauticEmail }>('/emails/new', {
+      method: 'POST',
+      body: JSON.stringify(email),
+    });
+  }
+
+  async updateEmail(id: number, email: Partial<MauticEmail>): Promise<{ email: MauticEmail }> {
+    return this.makeRequest<{ email: MauticEmail }>(`/emails/${id}/edit`, {
+      method: 'PATCH',
+      body: JSON.stringify(email),
+    });
+  }
+
+  async deleteEmail(id: number): Promise<{ email: MauticEmail }> {
+    return this.makeRequest<{ email: MauticEmail }>(`/emails/${id}/delete`, {
+      method: 'DELETE',
+    });
+  }
+
+  async sendEmailToContact(emailId: number, params: SendEmailParams): Promise<SendEmailResponse> {
+    const body: any = {};
+    if (params.tokens) {
+      body.tokens = params.tokens;
+    }
+
+    return this.makeRequest<SendEmailResponse>(`/emails/${emailId}/contact/${params.contactId}/send`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async sendEmailToSegments(emailId: number): Promise<SendEmailResponse> {
+    return this.makeRequest<SendEmailResponse>(`/emails/${emailId}/send`, {
       method: 'POST',
     });
   }

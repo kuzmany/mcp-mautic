@@ -149,3 +149,54 @@ export interface ListSegmentsParams {
   publishedOnly?: boolean;
   minimal?: boolean;
 }
+
+// Email types
+export interface MauticEmail {
+  id?: number;
+  name: string;
+  subject?: string;
+  fromAddress?: string;
+  fromName?: string;
+  replyToAddress?: string;
+  customHtml?: string;
+  plainText?: string;
+  isPublished?: boolean;
+  publishUp?: string;
+  publishDown?: string;
+  emailType?: 'list' | 'template';
+  language?: string;
+  readCount?: number;
+  sentCount?: number;
+  revision?: number;
+  category?: string;
+  lists?: Array<{
+    id: number;
+    name: string;
+  }>;
+  [key: string]: any;
+}
+
+export interface MauticEmailsResponse {
+  total: number;
+  emails: Record<string, MauticEmail>;
+}
+
+export interface ListEmailsParams {
+  limit?: number;
+  search?: string;
+  orderBy?: 'id' | 'name' | 'subject' | 'dateAdded';
+  orderByDir?: 'asc' | 'desc';
+  start?: number;
+  publishedOnly?: boolean;
+  minimal?: boolean;
+}
+
+export interface SendEmailParams {
+  contactId: number;
+  tokens?: Record<string, string>;
+}
+
+export interface SendEmailResponse {
+  success: boolean;
+  details?: any;
+}

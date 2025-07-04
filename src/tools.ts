@@ -690,6 +690,237 @@ export class MauticTools {
           },
           required: ["segmentId", "contactId"]
         }
+      },
+      // Email management tools
+      {
+        name: "mautic_list_emails",
+        description: "List emails from Mautic with filtering and pagination options",
+        inputSchema: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of emails to retrieve (1-100)",
+              minimum: 1,
+              maximum: 100,
+              default: 10
+            },
+            search: {
+              type: "string",
+              description: "Search term for filtering emails by name, subject, etc."
+            },
+            orderBy: {
+              type: "string",
+              enum: ["id", "name", "subject", "dateAdded"],
+              description: "Field to sort by"
+            },
+            orderByDir: {
+              type: "string",
+              enum: ["asc", "desc"],
+              description: "Sort direction",
+              default: "asc"
+            },
+            start: {
+              type: "number",
+              description: "Starting position for pagination",
+              minimum: 0,
+              default: 0
+            },
+            publishedOnly: {
+              type: "boolean",
+              description: "Return only published emails",
+              default: false
+            },
+            minimal: {
+              type: "boolean",
+              description: "Return minimal email data (default: true for reduced output)",
+              default: true
+            }
+          }
+        }
+      },
+      {
+        name: "mautic_get_email",
+        description: "Get a specific email by ID",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Email ID to retrieve (required)"
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_create_email",
+        description: "Create a new email in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "Email name (required)"
+            },
+            subject: {
+              type: "string",
+              description: "Email subject line"
+            },
+            fromAddress: {
+              type: "string",
+              format: "email",
+              description: "From email address"
+            },
+            fromName: {
+              type: "string",
+              description: "From name"
+            },
+            replyToAddress: {
+              type: "string",
+              format: "email",
+              description: "Reply-to email address"
+            },
+            customHtml: {
+              type: "string",
+              description: "Email HTML content"
+            },
+            plainText: {
+              type: "string",
+              description: "Email plain text content"
+            },
+            emailType: {
+              type: "string",
+              enum: ["list", "template"],
+              description: "Email type (list for segment emails, template for transactional)",
+              default: "template"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the email is published",
+              default: true
+            },
+            language: {
+              type: "string",
+              description: "Email language"
+            }
+          },
+          required: ["name"]
+        }
+      },
+      {
+        name: "mautic_update_email",
+        description: "Update an existing email in Mautic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Email ID to update (required)"
+            },
+            name: {
+              type: "string",
+              description: "Email name"
+            },
+            subject: {
+              type: "string",
+              description: "Email subject line"
+            },
+            fromAddress: {
+              type: "string",
+              format: "email",
+              description: "From email address"
+            },
+            fromName: {
+              type: "string",
+              description: "From name"
+            },
+            replyToAddress: {
+              type: "string",
+              format: "email",
+              description: "Reply-to email address"
+            },
+            customHtml: {
+              type: "string",
+              description: "Email HTML content"
+            },
+            plainText: {
+              type: "string",
+              description: "Email plain text content"
+            },
+            emailType: {
+              type: "string",
+              enum: ["list", "template"],
+              description: "Email type"
+            },
+            isPublished: {
+              type: "boolean",
+              description: "Whether the email is published"
+            },
+            language: {
+              type: "string",
+              description: "Email language"
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "mautic_delete_email",
+        description: "⚠️ DANGER: Permanently delete an email from Mautic (requires confirmation)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "number",
+              description: "Email ID to delete (required)"
+            },
+            confirm: {
+              type: "boolean",
+              description: "Must be set to true to confirm deletion (required for safety)"
+            }
+          },
+          required: ["id", "confirm"]
+        }
+      },
+      {
+        name: "mautic_send_email_to_contact",
+        description: "Send an email to a specific contact",
+        inputSchema: {
+          type: "object",
+          properties: {
+            emailId: {
+              type: "number",
+              description: "Email ID to send (required)"
+            },
+            contactId: {
+              type: "number",
+              description: "Contact ID to send email to (required)"
+            },
+            tokens: {
+              type: "object",
+              description: "Optional tokens for email personalization (key-value pairs)",
+              additionalProperties: {
+                type: "string"
+              }
+            }
+          },
+          required: ["emailId", "contactId"]
+        }
+      },
+      {
+        name: "mautic_send_email_to_segments",
+        description: "Send an email to all contacts in the email's assigned segments",
+        inputSchema: {
+          type: "object",
+          properties: {
+            emailId: {
+              type: "number",
+              description: "Email ID to send (required)"
+            }
+          },
+          required: ["emailId"]
+        }
       }
     ];
   }
@@ -739,6 +970,21 @@ export class MauticTools {
           return await this.addContactToSegment(args);
         case "mautic_remove_contact_from_segment":
           return await this.removeContactFromSegment(args);
+        // Email tools
+        case "mautic_list_emails":
+          return await this.listEmails(args);
+        case "mautic_get_email":
+          return await this.getEmail(args);
+        case "mautic_create_email":
+          return await this.createEmail(args);
+        case "mautic_update_email":
+          return await this.updateEmail(args);
+        case "mautic_delete_email":
+          return await this.deleteEmail(args);
+        case "mautic_send_email_to_contact":
+          return await this.sendEmailToContact(args);
+        case "mautic_send_email_to_segments":
+          return await this.sendEmailToSegments(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -1344,6 +1590,216 @@ export class MauticTools {
             contactId: validatedArgs.contactId,
             success: response.success,
             timestamp: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  // Email methods
+  private async listEmails(args: any = {}) {
+    const schema = z.object({
+      limit: z.number().min(1).max(100).optional().default(10),
+      search: z.string().optional(),
+      orderBy: z.enum(['id', 'name', 'subject', 'dateAdded']).optional(),
+      orderByDir: z.enum(['asc', 'desc']).optional().default('asc'),
+      start: z.number().min(0).optional().default(0),
+      publishedOnly: z.boolean().optional(),
+      minimal: z.boolean().optional().default(true)
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.listEmails(validatedArgs);
+    
+    const emails = Object.values(response.emails);
+    const summary = `Found ${response.total} total emails, showing ${emails.length} emails`;
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${summary}\n\n${JSON.stringify({
+            total: response.total,
+            showing: emails.length,
+            emails: emails
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async getEmail(args: any) {
+    const schema = z.object({
+      id: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.getEmail(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email retrieved successfully:\n\n${JSON.stringify(response.email, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async createEmail(args: any) {
+    const schema = z.object({
+      name: z.string(),
+      subject: z.string().optional(),
+      fromAddress: z.string().email().optional(),
+      fromName: z.string().optional(),
+      replyToAddress: z.string().email().optional(),
+      customHtml: z.string().optional(),
+      plainText: z.string().optional(),
+      emailType: z.enum(['list', 'template']).optional().default('template'),
+      isPublished: z.boolean().optional().default(true),
+      language: z.string().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.createEmail(validatedArgs);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email created successfully:\n\n${JSON.stringify({
+            id: response.email.id,
+            name: response.email.name,
+            subject: response.email.subject,
+            emailType: response.email.emailType,
+            isPublished: response.email.isPublished,
+            createdAt: response.email.dateAdded
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async updateEmail(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      name: z.string().optional(),
+      subject: z.string().optional(),
+      fromAddress: z.string().email().optional(),
+      fromName: z.string().optional(),
+      replyToAddress: z.string().email().optional(),
+      customHtml: z.string().optional(),
+      plainText: z.string().optional(),
+      emailType: z.enum(['list', 'template']).optional(),
+      isPublished: z.boolean().optional(),
+      language: z.string().optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const { id, ...updateData } = validatedArgs;
+    
+    // Remove undefined values
+    const cleanUpdateData = Object.fromEntries(
+      Object.entries(updateData).filter(([_, value]) => value !== undefined)
+    );
+
+    if (Object.keys(cleanUpdateData).length === 0) {
+      throw new Error('At least one field must be provided for update');
+    }
+
+    const response = await this.client.updateEmail(id, cleanUpdateData);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email updated successfully:\n\n${JSON.stringify({
+            id: response.email.id,
+            name: response.email.name,
+            subject: response.email.subject,
+            emailType: response.email.emailType,
+            isPublished: response.email.isPublished,
+            updatedAt: response.email.dateModified
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async deleteEmail(args: any) {
+    const schema = z.object({
+      id: z.number(),
+      confirm: z.boolean()
+    });
+
+    const validatedArgs = schema.parse(args);
+    
+    if (!validatedArgs.confirm) {
+      throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
+    }
+
+    const response = await this.client.deleteEmail(validatedArgs.id);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email deleted successfully:\n\n${JSON.stringify({
+            id: response.email.id,
+            name: response.email.name,
+            subject: response.email.subject,
+            deletedAt: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async sendEmailToContact(args: any) {
+    const schema = z.object({
+      emailId: z.number(),
+      contactId: z.number(),
+      tokens: z.record(z.string()).optional()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.sendEmailToContact(validatedArgs.emailId, {
+      contactId: validatedArgs.contactId,
+      tokens: validatedArgs.tokens
+    });
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email sent successfully:\n\n${JSON.stringify({
+            emailId: validatedArgs.emailId,
+            contactId: validatedArgs.contactId,
+            success: response.success,
+            tokens: validatedArgs.tokens || {},
+            sentAt: new Date().toISOString()
+          }, null, 2)}`
+        }
+      ]
+    };
+  }
+
+  private async sendEmailToSegments(args: any) {
+    const schema = z.object({
+      emailId: z.number()
+    });
+
+    const validatedArgs = schema.parse(args);
+    const response = await this.client.sendEmailToSegments(validatedArgs.emailId);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email sent to segments successfully:\n\n${JSON.stringify({
+            emailId: validatedArgs.emailId,
+            success: response.success,
+            sentAt: new Date().toISOString()
           }, null, 2)}`
         }
       ]
