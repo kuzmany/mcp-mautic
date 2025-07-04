@@ -765,7 +765,7 @@ export class MauticTools {
             },
             subject: {
               type: "string",
-              description: "Email subject line (required for most email types)"
+              description: "Email subject line (optional but recommended)"
             },
             fromAddress: {
               type: "string",
@@ -803,9 +803,16 @@ export class MauticTools {
             language: {
               type: "string",
               description: "Email language"
+            },
+            lists: {
+              type: "array",
+              description: "Array of segment/list IDs (required when emailType is 'list')",
+              items: {
+                type: "number"
+              }
             }
           },
-          required: ["name", "subject"]
+          required: ["name"]
         }
       },
       {
@@ -860,6 +867,13 @@ export class MauticTools {
             language: {
               type: "string",
               description: "Email language"
+            },
+            lists: {
+              type: "array",
+              description: "Array of segment/list IDs (required when emailType is 'list')",
+              items: {
+                type: "number"
+              }
             }
           },
           required: ["id"]
@@ -1649,7 +1663,7 @@ export class MauticTools {
   private async createEmail(args: any) {
     const schema = z.object({
       name: z.string(),
-      subject: z.string(),
+      subject: z.string().optional(),
       fromAddress: z.string().email().optional(),
       fromName: z.string().optional(),
       replyToAddress: z.string().email().optional(),
@@ -1657,10 +1671,17 @@ export class MauticTools {
       plainText: z.string().optional(),
       emailType: z.enum(['list', 'template']).optional().default('template'),
       isPublished: z.boolean().optional().default(true),
-      language: z.string().optional()
+      language: z.string().optional(),
+      lists: z.array(z.number()).optional()
     });
 
     const validatedArgs = schema.parse(args);
+    
+    // Validate that lists is provided when emailType is 'list'
+    if (validatedArgs.emailType === 'list' && (!validatedArgs.lists || validatedArgs.lists.length === 0)) {
+      throw new Error('Lists array is required when emailType is "list"');
+    }
+    
     const response = await this.client.createEmail(validatedArgs);
     
     return {
@@ -1692,10 +1713,17 @@ export class MauticTools {
       plainText: z.string().optional(),
       emailType: z.enum(['list', 'template']).optional(),
       isPublished: z.boolean().optional(),
-      language: z.string().optional()
+      language: z.string().optional(),
+      lists: z.array(z.number()).optional()
     });
 
     const validatedArgs = schema.parse(args);
+    
+    // Validate that lists is provided when emailType is 'list'
+    if (validatedArgs.emailType === 'list' && (!validatedArgs.lists || validatedArgs.lists.length === 0)) {
+      throw new Error('Lists array is required when emailType is "list"');
+    }
+    
     const { id, ...updateData } = validatedArgs;
     
     // Remove undefined values
