@@ -765,7 +765,11 @@ export class MauticTools {
             },
             subject: {
               type: "string",
-              description: "Email subject line (optional but recommended)"
+              description: "Email subject line (required by this Mautic instance)"
+            },
+            template: {
+              type: "string", 
+              description: "Email template theme (required). Use 'blank-as-email' for basic template"
             },
             fromAddress: {
               type: "string",
@@ -812,7 +816,7 @@ export class MauticTools {
               }
             }
           },
-          required: ["name"]
+          required: ["name", "subject", "template"]
         }
       },
       {
@@ -832,6 +836,10 @@ export class MauticTools {
             subject: {
               type: "string",
               description: "Email subject line"
+            },
+            template: {
+              type: "string",
+              description: "Email template theme. Use 'blank-as-email' for basic template"
             },
             fromAddress: {
               type: "string",

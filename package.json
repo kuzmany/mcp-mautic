@@ -1,6 +1,6 @@
 {
   "name": "mcp-mautic-server",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "MCP server for Mautic marketing automation platform integration",
   "type": "module",
   "main": "./build/index.js",
@@ -14,12 +14,21 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch", 
+    "dev": "tsc --watch",
     "start": "node build/index.js",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["mcp", "mautic", "api", "server", "marketing", "automation", "claude", "anthropic"],
+  "keywords": [
+    "mcp",
+    "mautic",
+    "api",
+    "server",
+    "marketing",
+    "automation",
+    "claude",
+    "anthropic"
+  ],
   "author": "Zdeno Kuzmany",
   "license": "MIT",
   "repository": {
@@ -32,6 +41,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
+    "node-fetch": "^3.3.2",
     "zod": "^3.22.0"
   },
   "devDependencies": {

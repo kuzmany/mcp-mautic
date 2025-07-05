@@ -154,7 +154,8 @@ export interface ListSegmentsParams {
 export interface MauticEmail {
   id?: number;
   name: string;
-  subject?: string;
+  subject: string;  // Required by this Mautic instance
+  template: string; // Required by this Mautic instance  
   fromAddress?: string;
   fromName?: string;
   replyToAddress?: string;
