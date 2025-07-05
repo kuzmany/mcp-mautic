@@ -18,7 +18,7 @@ export class MauticTools {
     if (contact.fields && contact.fields.all) {
       filtered.fields = { all: contact.fields.all };
     }
-    
+
     return filtered;
   }
 
@@ -199,7 +199,7 @@ export class MauticTools {
               type: "string",
               enum: [
                 "email_stats",
-                "asset_downloads", 
+                "asset_downloads",
                 "campaign_lead_event_log",
                 "campaign_leads",
                 "email_stats_devices",
@@ -254,7 +254,7 @@ export class MauticTools {
               description: "Start date (YYYY-MM-DD format)"
             },
             dateTo: {
-              type: "string", 
+              type: "string",
               description: "End date (YYYY-MM-DD format)"
             },
             timeUnit: {
@@ -286,7 +286,7 @@ export class MauticTools {
                 type: "string",
                 enum: [
                   "lead.identified",
-                  "asset.download", 
+                  "asset.download",
                   "campaign.event",
                   "email.read",
                   "email.sent",
@@ -768,17 +768,17 @@ export class MauticTools {
               description: "Email subject line (required by this Mautic instance)"
             },
             template: {
-              type: "string", 
+              type: "string",
               description: "Email template theme (required). Use 'blank-as-email' for basic template"
             },
             fromAddress: {
               type: "string",
               format: "email",
-              description: "From email address"
+              description: "From email address (optional - uses Mautic default if omitted)"
             },
             fromName: {
               type: "string",
-              description: "From name"
+              description: "From name (optional - uses Mautic default if omitted)"
             },
             replyToAddress: {
               type: "string",
@@ -841,20 +841,6 @@ export class MauticTools {
               type: "string",
               description: "Email template theme. Use 'blank-as-email' for basic template"
             },
-            fromAddress: {
-              type: "string",
-              format: "email",
-              description: "From email address"
-            },
-            fromName: {
-              type: "string",
-              description: "From name"
-            },
-            replyToAddress: {
-              type: "string",
-              format: "email",
-              description: "Reply-to email address"
-            },
             customHtml: {
               type: "string",
               description: "Email HTML content"
@@ -871,6 +857,20 @@ export class MauticTools {
             isPublished: {
               type: "boolean",
               description: "Whether the email is published"
+            },
+            fromAddress: {
+              type: "string",
+              format: "email",
+              description: "From email address"
+            },
+            fromName: {
+              type: "string",
+              description: "From name"
+            },
+            replyToAddress: {
+              type: "string",
+              format: "email",
+              description: "Reply-to email address"
             },
             language: {
               type: "string",
@@ -1031,9 +1031,9 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getContact(validatedArgs.id);
-    
+
     const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
-    
+
     return {
       content: [
         {
@@ -1057,12 +1057,12 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.listContacts(validatedArgs);
-    
-    const contacts = Object.values(response.contacts).map(contact => 
+
+    const contacts = Object.values(response.contacts).map(contact =>
       this.filterContactResponse(contact, validatedArgs.fullResponse)
     );
     const summary = `Found ${response.total} total contacts, showing ${contacts.length} contacts`;
-    
+
     return {
       content: [
         {
@@ -1089,9 +1089,9 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.createContact(validatedArgs);
-    
+
     const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
-    
+
     return {
       content: [
         {
@@ -1115,7 +1115,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const { id, fullResponse, ...updateData } = validatedArgs;
-    
+
     // Remove undefined values
     const cleanUpdateData = Object.fromEntries(
       Object.entries(updateData).filter(([_, value]) => value !== undefined)
@@ -1126,9 +1126,9 @@ export class MauticTools {
     }
 
     const response = await this.client.updateContact(id, cleanUpdateData);
-    
+
     const filteredContact = this.filterContactResponse(response.contact, fullResponse);
-    
+
     return {
       content: [
         {
@@ -1147,15 +1147,15 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     if (!validatedArgs.confirm) {
       throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
     }
 
     const response = await this.client.deleteContact(validatedArgs.id);
-    
+
     const filteredContact = this.filterContactResponse(response.contact, validatedArgs.fullResponse);
-    
+
     return {
       content: [
         {
@@ -1175,7 +1175,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getStats(validatedArgs);
-    
+
     return {
       content: [
         {
@@ -1200,15 +1200,15 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getData(validatedArgs);
-    
+
     return {
       content: [
         {
           type: "text",
           text: `Dashboard data${validatedArgs.type ? ` for ${validatedArgs.type}` : ''}:\n\n${JSON.stringify({
             type: validatedArgs.type || 'summary',
-            dateRange: validatedArgs.dateFrom && validatedArgs.dateTo 
-              ? `${validatedArgs.dateFrom} to ${validatedArgs.dateTo}` 
+            dateRange: validatedArgs.dateFrom && validatedArgs.dateTo
+              ? `${validatedArgs.dateFrom} to ${validatedArgs.dateTo}`
               : 'default range',
             timeUnit: validatedArgs.timeUnit,
             data: response.data,
@@ -1231,7 +1231,7 @@ export class MauticTools {
       search: validatedArgs.search,
       includeEvents: validatedArgs.includeEvents
     });
-    
+
     return {
       content: [
         {
@@ -1263,10 +1263,10 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.listAssets(validatedArgs);
-    
+
     const assets = Object.values(response.assets);
     const summary = `Found ${response.total} total assets, showing ${assets.length} assets`;
-    
+
     return {
       content: [
         {
@@ -1288,7 +1288,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getAsset(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1320,7 +1320,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.createAsset(validatedArgs);
-    
+
     return {
       content: [
         {
@@ -1351,7 +1351,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const { id, ...updateData } = validatedArgs;
-    
+
     const cleanUpdateData = Object.fromEntries(
       Object.entries(updateData).filter(([_, value]) => value !== undefined)
     );
@@ -1361,7 +1361,7 @@ export class MauticTools {
     }
 
     const response = await this.client.updateAsset(id, cleanUpdateData);
-    
+
     return {
       content: [
         {
@@ -1385,13 +1385,13 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     if (!validatedArgs.confirm) {
       throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
     }
 
     const response = await this.client.deleteAsset(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1420,10 +1420,10 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.listSegments(validatedArgs);
-    
+
     const segments = Object.values(response.lists);
     const summary = `Found ${response.total} total segments, showing ${segments.length} segments`;
-    
+
     return {
       content: [
         {
@@ -1445,7 +1445,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getSegment(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1479,7 +1479,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.createSegment(validatedArgs);
-    
+
     return {
       content: [
         {
@@ -1514,7 +1514,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const { id, ...updateData } = validatedArgs;
-    
+
     const cleanUpdateData = Object.fromEntries(
       Object.entries(updateData).filter(([_, value]) => value !== undefined)
     );
@@ -1524,7 +1524,7 @@ export class MauticTools {
     }
 
     const response = await this.client.updateSegment(id, cleanUpdateData);
-    
+
     return {
       content: [
         {
@@ -1549,13 +1549,13 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     if (!validatedArgs.confirm) {
       throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
     }
 
     const response = await this.client.deleteSegment(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1578,7 +1578,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.addContactToSegment(validatedArgs.segmentId, validatedArgs.contactId);
-    
+
     return {
       content: [
         {
@@ -1602,7 +1602,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.removeContactFromSegment(validatedArgs.segmentId, validatedArgs.contactId);
-    
+
     return {
       content: [
         {
@@ -1632,10 +1632,10 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.listEmails(validatedArgs);
-    
+
     const emails = Object.values(response.emails);
     const summary = `Found ${response.total} total emails, showing ${emails.length} emails`;
-    
+
     return {
       content: [
         {
@@ -1657,7 +1657,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.getEmail(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1685,14 +1685,14 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     // Validate that lists is provided when emailType is 'list'
     if (validatedArgs.emailType === 'list' && (!validatedArgs.lists || validatedArgs.lists.length === 0)) {
       throw new Error('Lists array is required when emailType is "list"');
     }
-    
+
     const response = await this.client.createEmail(validatedArgs);
-    
+
     return {
       content: [
         {
@@ -1728,14 +1728,14 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     // Validate that lists is provided when emailType is 'list'
     if (validatedArgs.emailType === 'list' && (!validatedArgs.lists || validatedArgs.lists.length === 0)) {
       throw new Error('Lists array is required when emailType is "list"');
     }
-    
+
     const { id, ...updateData } = validatedArgs;
-    
+
     // Remove undefined values
     const cleanUpdateData = Object.fromEntries(
       Object.entries(updateData).filter(([_, value]) => value !== undefined)
@@ -1746,7 +1746,7 @@ export class MauticTools {
     }
 
     const response = await this.client.updateEmail(id, cleanUpdateData);
-    
+
     return {
       content: [
         {
@@ -1771,13 +1771,13 @@ export class MauticTools {
     });
 
     const validatedArgs = schema.parse(args);
-    
+
     if (!validatedArgs.confirm) {
       throw new Error('Deletion not confirmed. Set confirm: true to proceed with deletion.');
     }
 
     const response = await this.client.deleteEmail(validatedArgs.id);
-    
+
     return {
       content: [
         {
@@ -1805,7 +1805,7 @@ export class MauticTools {
       contactId: validatedArgs.contactId,
       tokens: validatedArgs.tokens
     });
-    
+
     return {
       content: [
         {
@@ -1829,7 +1829,7 @@ export class MauticTools {
 
     const validatedArgs = schema.parse(args);
     const response = await this.client.sendEmailToSegments(validatedArgs.emailId);
-    
+
     return {
       content: [
         {
