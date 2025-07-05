@@ -1671,7 +1671,8 @@ export class MauticTools {
   private async createEmail(args: any) {
     const schema = z.object({
       name: z.string(),
-      subject: z.string().optional(),
+      subject: z.string(),
+      template: z.string(),
       fromAddress: z.string().email().optional(),
       fromName: z.string().optional(),
       replyToAddress: z.string().email().optional(),
@@ -1714,6 +1715,7 @@ export class MauticTools {
       id: z.number(),
       name: z.string().optional(),
       subject: z.string().optional(),
+      template: z.string().optional(),
       fromAddress: z.string().email().optional(),
       fromName: z.string().optional(),
       replyToAddress: z.string().email().optional(),

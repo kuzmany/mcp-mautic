@@ -1,6 +1,6 @@
 {
   "name": "mcp-mautic-server",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "MCP server for Mautic marketing automation platform integration",
   "type": "module",
   "main": "./build/index.js",
